@@ -274,7 +274,7 @@ module GPX
           if @version == '1.0'
             xml.name @name
             xml.time @time.xmlschema
-            xml.bound(
+            xml.bounds(
               minlat: bounds.min_lat,
               minlon: bounds.min_lon,
               maxlat: bounds.max_lat,
@@ -284,7 +284,7 @@ module GPX
             xml.metadata do
               xml.name @name
               xml.time @time.xmlschema
-              xml.bound(
+              xml.bounds(
                 minlat: bounds.min_lat,
                 minlon: bounds.min_lon,
                 maxlat: bounds.max_lat,
