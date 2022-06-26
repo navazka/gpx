@@ -5,7 +5,7 @@ module GPX
     attr_accessor :tracks,
                   :routes, :waypoints, :bounds, :lowest_point, :highest_point, :duration, :ns, :time, :name, :version, :creator, :description, :moving_duration
 
-    DEFAULT_CREATOR = "GPX RubyGem #{GPX::VERSION} -- http://dougfales.github.io/gpx/"
+    DEFAULT_CREATOR = "GPX RubyGem #{GPX::VERSION}"
 
     # This initializer can be used to create a new GPXFile from an existing
     # file or to create a new GPXFile instance with no data (so that you can
@@ -262,6 +262,7 @@ module GPX
 
       gpx_header['version'] = @version.to_s unless gpx_header['version']
       gpx_header['creator'] = DEFAULT_CREATOR unless gpx_header['creator']
+      gpx_header['xmlns'] = "http://www.topografix.com/GPX/#{version_dir}" unless gpx_header['xsi:schemaLocation']
       gpx_header['xsi:schemaLocation'] = "http://www.topografix.com/GPX/#{version_dir} http://www.topografix.com/GPX/#{version_dir}/gpx.xsd" unless gpx_header['xsi:schemaLocation']
       gpx_header['xmlns:xsi'] = 'http://www.w3.org/2001/XMLSchema-instance' if !gpx_header['xsi'] && !gpx_header['xmlns:xsi']
 
@@ -293,6 +294,15 @@ module GPX
             end
           end
 
+          waypoints&.each do |w|
+            xml.wpt(lat: w.lat, lon: w.lon) do
+              xml.time w.time.xmlschema unless w.time.nil?
+              Waypoint::SUB_ELEMENTS.each do |sub_elem|
+                xml.send(sub_elem, w.send(sub_elem)) if w.respond_to?(sub_elem) && !w.send(sub_elem).nil?
+              end
+            end
+          end
+
           tracks&.each do |t|
             xml.trk do
               xml.name t.name
@@ -307,15 +317,6 @@ module GPX
                     end
                   end
                 end
-              end
-            end
-          end
-
-          waypoints&.each do |w|
-            xml.wpt(lat: w.lat, lon: w.lon) do
-              xml.time w.time.xmlschema unless w.time.nil?
-              Waypoint::SUB_ELEMENTS.each do |sub_elem|
-                xml.send(sub_elem, w.send(sub_elem)) if w.respond_to?(sub_elem) && !w.send(sub_elem).nil?
               end
             end
           end
