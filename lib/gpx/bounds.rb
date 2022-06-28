@@ -52,5 +52,9 @@ module GPX
     def to_s
       "min_lat: #{min_lat} min_lon: #{min_lon} max_lat: #{max_lat} max_lon: #{max_lon}"
     end
+
+    def is_valid?
+      min_lat <= max_lat and min_lon <= max_lon
+    end
   end
 end

@@ -280,7 +280,7 @@ module GPX
               minlon: bounds.min_lon,
               maxlat: bounds.max_lat,
               maxlon: bounds.max_lon
-            )
+            ) if bounds.is_valid?
           else
             xml.metadata do
               xml.name @name
@@ -290,7 +290,7 @@ module GPX
                 minlon: bounds.min_lon,
                 maxlat: bounds.max_lat,
                 maxlon: bounds.max_lon
-              )
+              ) if bounds.is_valid?
             end
           end
 
@@ -299,6 +299,19 @@ module GPX
               xml.time w.time.xmlschema unless w.time.nil?
               Waypoint::SUB_ELEMENTS.each do |sub_elem|
                 xml.send(sub_elem, w.send(sub_elem)) if w.respond_to?(sub_elem) && !w.send(sub_elem).nil?
+              end
+            end
+          end
+
+          routes&.each do |r|
+            xml.rte do
+              xml.name r.name
+
+              r.points.each do |p|
+                xml.rtept(lat: p.lat, lon: p.lon) do
+                  xml.time p.time.xmlschema unless p.time.nil?
+                  xml.ele p.elevation unless p.elevation.nil?
+                end
               end
             end
           end
@@ -321,18 +334,6 @@ module GPX
             end
           end
 
-          routes&.each do |r|
-            xml.rte do
-              xml.name r.name
-
-              r.points.each do |p|
-                xml.rtept(lat: p.lat, lon: p.lon) do
-                  xml.time p.time.xmlschema unless p.time.nil?
-                  xml.ele p.elevation unless p.elevation.nil?
-                end
-              end
-            end
-          end
         end
       end
       # rubocop:enable Metrics/BlockLength
